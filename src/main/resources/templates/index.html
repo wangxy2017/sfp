@@ -10,7 +10,7 @@
         <td>文件</td>
     </tr>
     <tr>
-        <td><a href="javascript:;">..</a></td>
+        <td><a href="javascript:;" @click="up">..</a></td>
     </tr>
     <tr v-for="item in list">
         <td>
@@ -24,7 +24,8 @@
     var vue = new Vue({
         el: "#fileList",
         data: {
-            list: []
+            list: [],
+            currentPath: null
         },
         methods: {
             goto: function (isDirectory, path) {
@@ -32,20 +33,28 @@
                     axios
                         .get('/list?path=' + path)
                         .then(function (response) {
-                            vue.list = response.data;
+                            vue.list = response.data.list;
+                            vue.currentPath = response.data.currentPath;
                         });
                 } else {
                     window.location.href = "/download?path=" + path
                 }
+            },
+            up: function () {
+                axios
+                    .get('/list?currentPath=' + vue.currentPath)
+                    .then(function (response) {
+                        vue.list = response.data.list;
+                        vue.currentPath = response.data.currentPath;
+                    });
             }
         },
         mounted: function () {
             axios
                 .get('/list')
                 .then(function (response) {
-                    // console.log(response);
-                    vue.list = response.data;
-                    // console.log(this.list);
+                    vue.list = response.data.list;
+                    vue.currentPath = response.data.currentPath;
                 });
         }
     });

@@ -1,11 +1,14 @@
 package com.wxy.sfp.controller;
 
+import com.wxy.sfp.entity.ApiResponse;
 import com.wxy.sfp.entity.FileVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -40,20 +43,12 @@ public class IndexController {
      */
     @GetMapping("/list")
     @ResponseBody
-    public List<FileVo> list(@RequestParam(required = false) String path) {
+    public ApiResponse list(@RequestParam(required = false) String path) {
         File file = new File(path == null ? basedir : path);
         if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            List<FileVo> list = new ArrayList<>();
-            for (int i = 0; i < files.length; i++) {
-                FileVo f = new FileVo();
-                f.setName(files[i].getName());
-                f.setPath(files[i].getPath());
-                f.setIsDirectory(files[i].isDirectory());
-                list.add(f);
-            }
+            List<FileVo> list = readList(file);
             log.info("读取文件列表：path = {}", file.getPath());
-            return list;
+            return new ApiResponse(file.getPath(), list);
         }
         return null;
     }
@@ -92,5 +87,36 @@ public class IndexController {
                 IOUtils.closeQuietly(bis);
             }
         }
+    }
+
+    /**
+     * 返回上一层
+     *
+     * @param currentPath
+     * @return
+     */
+    @GetMapping("/up")
+    @ResponseBody
+    public ApiResponse up(@RequestParam String currentPath) {
+        File file = new File(currentPath);
+        if (file.exists()) {
+            List<FileVo> list = readList(file.getPath().equals(basedir) ? file : file.getParentFile());
+            log.info("返回上一层：path = {}", file.getPath());
+            return new ApiResponse(file.getPath(), list);
+        }
+        return null;
+    }
+
+    private List<FileVo> readList(File file) {
+        File[] files = file.listFiles();
+        List<FileVo> list = new ArrayList<>();
+        for (int i = 0; i < files.length; i++) {
+            FileVo f = new FileVo();
+            f.setName(files[i].getName());
+            f.setPath(files[i].getPath());
+            f.setIsDirectory(files[i].isDirectory());
+            list.add(f);
+        }
+        return list;
     }
 }
