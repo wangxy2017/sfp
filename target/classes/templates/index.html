@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文件列表</title>
+</head>
+<body>
+<table id="fileList">
+    <tr>
+        <td>文件</td>
+    </tr>
+    <tr>
+        <td><a href="javascript:;">..</a></td>
+    </tr>
+    <tr v-for="item in list">
+        <td>
+            <a href="javascript:;" @click="goto(item.isDirectory,item.path)" v-text="item.name"></a>
+        </td>
+    </tr>
+</table>
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var vue = new Vue({
+        el: "#fileList",
+        data: {
+            list: []
+        },
+        methods: {
+            goto: function (isDirectory, path) {
+                if (isDirectory) {
+                    axios
+                        .get('/list?path=' + path)
+                        .then(function (response) {
+                            vue.list = response.data;
+                        });
+                } else {
+                    window.location.href = "/download?path=" + path
+                }
+            }
+        },
+        mounted: function () {
+            axios
+                .get('/list')
+                .then(function (response) {
+                    // console.log(response);
+                    vue.list = response.data;
+                    // console.log(this.list);
+                });
+        }
+    });
+</script>
+</body>
+</html>
