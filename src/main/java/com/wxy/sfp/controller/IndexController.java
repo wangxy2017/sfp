@@ -117,6 +117,8 @@ public class IndexController {
             f.setIsDirectory(files[i].isDirectory());
             list.add(f);
         }
+        // 排序
+        list.sort((f1, f2) -> f1.getName().compareTo(f2.getName()));
         return list;
     }
 }
