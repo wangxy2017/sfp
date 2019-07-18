@@ -42,11 +42,11 @@ public class IndexController {
     @ResponseBody
     public ApiResponse list(@RequestParam(required = false) String path) {
         File file = new File(path == null ? basedir : path);
-        if (file.isDirectory()) {
+        if (file.isDirectory() && file.getPath().startsWith(basedir)) {
             List<FileVo> list = readList(file);
             log.info("读取文件列表：path = {}", file.getPath());
             Map<String, Object> data = new HashMap<>();
-            data.put("currentPath", file.getPath());
+            data.put("path", file.getPath());
             data.put("list", list);
             return new ApiResponse(1, "success", data);
         }
@@ -62,7 +62,7 @@ public class IndexController {
     @GetMapping("/download")
     public void download(HttpServletResponse response, @RequestParam String path) {
         File file = new File(path);
-        if (file.exists()) {
+        if (file.isFile() && file.getPath().startsWith(basedir)) {
             response.setContentType("application/force-download");// 设置强制下载不打开
             response.addHeader("Content-Disposition", "attachment;fileName=" + file.getName());// 设置文件名
 
@@ -87,23 +87,24 @@ public class IndexController {
                 IOUtils.closeQuietly(bis);
             }
         }
+        throw new RuntimeException("文件读取异常 path = " + path);
     }
 
     /**
      * 返回上一层
      *
-     * @param currentPath
+     * @param path
      * @return
      */
-    @GetMapping("/up")
+    @GetMapping("/back")
     @ResponseBody
-    public ApiResponse up(@RequestParam String currentPath) {
-        File file = new File(currentPath);
-        if (file.exists()) {
+    public ApiResponse back(@RequestParam String path) {
+        File file = new File(path);
+        if (file.exists() && file.getPath().startsWith(basedir)) {
             List<FileVo> list = readList(file.getPath().equals(basedir) ? file : file.getParentFile());
             log.info("返回上一层：path = {}", file.getPath());
             Map<String, Object> data = new HashMap<>();
-            data.put("currentPath", file.getPath().equals(basedir) ? file.getPath() : file.getParent());
+            data.put("path", file.getPath().equals(basedir) ? file.getPath() : file.getParent());
             data.put("list", list);
             return new ApiResponse(1, "success", data);
         }
