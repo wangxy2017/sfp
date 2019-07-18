@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -28,6 +29,11 @@ public class IndexController {
     @Value("${basedir}")
     private String basedir;
 
+//    @GetMapping
+//    public void index(HttpServletResponse response) throws IOException {
+//        response.sendRedirect("index.html");
+//    }
+
     /**
      * 读取文件列表
      *
@@ -37,7 +43,7 @@ public class IndexController {
     @GetMapping("/list")
     @ResponseBody
     public ApiResponse list(@RequestParam(required = false) String path) {
-        java.io.File file = new java.io.File(path == null ? basedir : path);
+        File file = new File(path == null ? basedir : path);
         if (file.isDirectory() && file.getPath().startsWith(basedir)) {
             List<FileInfo> list = readList(file);
             log.info("读取文件列表：path = {}", file.getPath());
@@ -57,7 +63,7 @@ public class IndexController {
      */
     @GetMapping("/download")
     public void download(HttpServletResponse response, @RequestParam String path) {
-        java.io.File file = new java.io.File(path);
+        File file = new File(path);
         if (file.isFile() && file.getPath().startsWith(basedir)) {
             response.setContentType("application/force-download");// 设置强制下载不打开
             response.addHeader("Content-Disposition", "attachment;fileName=" + file.getName());// 设置文件名
@@ -82,8 +88,9 @@ public class IndexController {
                 IOUtils.closeQuietly(fis);
                 IOUtils.closeQuietly(bis);
             }
+        } else {
+            throw new RuntimeException("文件读取异常 path = " + path);
         }
-        throw new RuntimeException("文件读取异常 path = " + path);
     }
 
     /**
@@ -95,7 +102,7 @@ public class IndexController {
     @GetMapping("/back")
     @ResponseBody
     public ApiResponse back(@RequestParam String path) {
-        java.io.File file = new java.io.File(path);
+        File file = new File(path);
         if (file.exists() && file.getPath().startsWith(basedir)) {
             List<FileInfo> list = readList(file.getPath().equals(basedir) ? file : file.getParentFile());
             log.info("返回上一层：path = {}", file.getPath());
@@ -107,8 +114,8 @@ public class IndexController {
         return new ApiResponse(-1, "error", null);
     }
 
-    private List<FileInfo> readList(java.io.File file) {
-        java.io.File[] files = file.listFiles();
+    private List<FileInfo> readList(File file) {
+        File[] files = file.listFiles();
         List<FileInfo> list = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
             FileInfo f = new FileInfo();

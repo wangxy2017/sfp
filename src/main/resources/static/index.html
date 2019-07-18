@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table id="list">
+    <tr>
+        <td>文件列表</td>
+    </tr>
+    <tr>
+        <td><a href="javascript:;" @click="back(path)">..</a></td>
+    </tr>
+    <tr v-for="file in files">
+        <td><a href="javascript:;" v-text="file.name" @click="goto(file.isDirectory,file.path)"></a></td>
+    </tr>
+</table>
+<script src="js/vue.js"></script>
+<script src="js/axios.min.js"></script>
+<script>
+    var table = new Vue({
+        el: "#list",
+        data: {
+            path: "",
+            files: []
+        },
+        methods: {
+            goto: function (isDirectory, path) {
+                if (isDirectory) {
+                    axios.get('/list?path=' + path)
+                        .then(function (response) {
+                            console.log(response);
+                            if (response.data.code == 1) {
+                                table.path = response.data.data.path;
+                                table.files = response.data.data.list;
+                            }
+                        });
+                } else {
+                    window.location.href = "/download?path=" + path;
+                }
+            },
+            back: function (path) {
+                axios.get('/back?path=' + path)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.data.code == 1) {
+                            table.path = response.data.data.path;
+                            table.files = response.data.data.list;
+                        }
+                    });
+            }
+        },
+        mounted: function () {
+            axios.get('/list')
+                .then(function (response) {
+                    console.log(response);
+                    if (response.data.code == 1) {
+                        table.path = response.data.data.path;
+                        table.files = response.data.data.list;
+                    }
+                });
+        }
+    });
+</script>
+</body>
+</html>
