@@ -3,11 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>文件列表</title>
+    <style>
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
 <table id="list">
     <tr>
-        <td>文件列表</td>
+        <td><span class="title">文件列表</span>
+            <button @click="refresh(path)">刷新</button>
+        </td>
     </tr>
     <tr>
         <td><a href="javascript:;" @click="back(path)">..</a></td>
@@ -49,6 +58,9 @@
                             table.files = response.data.data.list;
                         }
                     });
+            },
+            refresh: function (path) {
+                table.goto(true, path);
             }
         },
         mounted: function () {
