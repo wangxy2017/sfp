@@ -12,10 +12,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -28,11 +26,6 @@ import java.util.*;
 public class IndexController {
     @Value("${basedir}")
     private String basedir;
-
-//    @GetMapping
-//    public void index(HttpServletResponse response) throws IOException {
-//        response.sendRedirect("index.html");
-//    }
 
     /**
      * 读取文件列表
@@ -62,11 +55,11 @@ public class IndexController {
      * @param path
      */
     @GetMapping("/download")
-    public void download(HttpServletResponse response, @RequestParam String path) {
+    public void download(HttpServletResponse response, @RequestParam String path) throws UnsupportedEncodingException {
         File file = new File(path);
         if (file.isFile() && file.getPath().startsWith(basedir)) {
             response.setContentType("application/force-download");// 设置强制下载不打开
-            response.addHeader("Content-Disposition", "attachment;fileName=" + file.getName());// 设置文件名
+            response.addHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(file.getName(), "UTF-8"));// 设置文件名
 
             byte[] buffer = new byte[1024 * 10];
             FileInputStream fis = null;
