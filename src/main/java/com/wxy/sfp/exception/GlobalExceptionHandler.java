@@ -1,5 +1,6 @@
 package com.wxy.sfp.exception;
 
+import com.wxy.sfp.entity.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,7 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class GlobalExceptionHandler {
     @ExceptionHandler()
     @ResponseBody
-    public void exceptionHandle(Exception e) {
+    public ApiResponse exceptionHandle(Exception e) {
         log.error(e.getLocalizedMessage());
+        return new ApiResponse(500, "系统错误", null);
     }
 }

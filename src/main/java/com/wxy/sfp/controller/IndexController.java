@@ -17,7 +17,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author wxy
@@ -29,11 +31,6 @@ import java.util.List;
 public class IndexController {
     @Value("${basedir}")
     private String basedir;
-
-    @GetMapping
-    public String index() {
-        return "index";
-    }
 
     /**
      * 读取文件列表
@@ -48,9 +45,12 @@ public class IndexController {
         if (file.isDirectory()) {
             List<FileVo> list = readList(file);
             log.info("读取文件列表：path = {}", file.getPath());
-            return new ApiResponse(file.getPath(), list);
+            Map<String, Object> data = new HashMap<>();
+            data.put("currentPath", file.getPath());
+            data.put("list", list);
+            return new ApiResponse(1, "success", data);
         }
-        return null;
+        return new ApiResponse(-1, "error", null);
     }
 
     /**
@@ -102,9 +102,12 @@ public class IndexController {
         if (file.exists()) {
             List<FileVo> list = readList(file.getPath().equals(basedir) ? file : file.getParentFile());
             log.info("返回上一层：path = {}", file.getPath());
-            return new ApiResponse(file.getPath(), list);
+            Map<String, Object> data = new HashMap<>();
+            data.put("currentPath", file.getPath().equals(basedir) ? file.getPath() : file.getParent());
+            data.put("list", list);
+            return new ApiResponse(1, "success", data);
         }
-        return null;
+        return new ApiResponse(-1, "error", null);
     }
 
     private List<FileVo> readList(File file) {

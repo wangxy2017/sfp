@@ -2,8 +2,6 @@ package com.wxy.sfp.entity;
 
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * @Author wxy
  * @Date 19-7-17 下午3:29
@@ -11,11 +9,13 @@ import java.util.List;
  **/
 @Data
 public class ApiResponse {
-    private String currentPath;
-    private List<FileVo> list;
+    private Integer code;
+    private String msg;
+    private Object data;
 
-    public ApiResponse(String currentPath, List<FileVo> list) {
-        this.currentPath = currentPath;
-        this.list = list;
+    public ApiResponse(Integer code,String msg,Object data){
+        this.code = code;
+        this.msg = msg;
+        this.data = data;
     }
 }
