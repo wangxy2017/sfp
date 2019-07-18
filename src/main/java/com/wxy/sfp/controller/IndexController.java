@@ -1,7 +1,7 @@
 package com.wxy.sfp.controller;
 
 import com.wxy.sfp.entity.ApiResponse;
-import com.wxy.sfp.entity.FileVo;
+import com.wxy.sfp.entity.FileInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,13 +13,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author wxy
@@ -41,9 +37,9 @@ public class IndexController {
     @GetMapping("/list")
     @ResponseBody
     public ApiResponse list(@RequestParam(required = false) String path) {
-        File file = new File(path == null ? basedir : path);
+        java.io.File file = new java.io.File(path == null ? basedir : path);
         if (file.isDirectory() && file.getPath().startsWith(basedir)) {
-            List<FileVo> list = readList(file);
+            List<FileInfo> list = readList(file);
             log.info("读取文件列表：path = {}", file.getPath());
             Map<String, Object> data = new HashMap<>();
             data.put("path", file.getPath());
@@ -61,7 +57,7 @@ public class IndexController {
      */
     @GetMapping("/download")
     public void download(HttpServletResponse response, @RequestParam String path) {
-        File file = new File(path);
+        java.io.File file = new java.io.File(path);
         if (file.isFile() && file.getPath().startsWith(basedir)) {
             response.setContentType("application/force-download");// 设置强制下载不打开
             response.addHeader("Content-Disposition", "attachment;fileName=" + file.getName());// 设置文件名
@@ -99,9 +95,9 @@ public class IndexController {
     @GetMapping("/back")
     @ResponseBody
     public ApiResponse back(@RequestParam String path) {
-        File file = new File(path);
+        java.io.File file = new java.io.File(path);
         if (file.exists() && file.getPath().startsWith(basedir)) {
-            List<FileVo> list = readList(file.getPath().equals(basedir) ? file : file.getParentFile());
+            List<FileInfo> list = readList(file.getPath().equals(basedir) ? file : file.getParentFile());
             log.info("返回上一层：path = {}", file.getPath());
             Map<String, Object> data = new HashMap<>();
             data.put("path", file.getPath().equals(basedir) ? file.getPath() : file.getParent());
@@ -111,18 +107,18 @@ public class IndexController {
         return new ApiResponse(-1, "error", null);
     }
 
-    private List<FileVo> readList(File file) {
-        File[] files = file.listFiles();
-        List<FileVo> list = new ArrayList<>();
+    private List<FileInfo> readList(java.io.File file) {
+        java.io.File[] files = file.listFiles();
+        List<FileInfo> list = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
-            FileVo f = new FileVo();
+            FileInfo f = new FileInfo();
             f.setName(files[i].getName());
             f.setPath(files[i].getPath());
             f.setIsDirectory(files[i].isDirectory());
             list.add(f);
         }
         // 排序
-        list.sort((f1, f2) -> f1.getName().compareTo(f2.getName()));
+        list.sort(Comparator.comparing(FileInfo::getName));
         return list;
     }
 }

@@ -8,7 +8,7 @@ import lombok.Data;
  * @Description TODO
  **/
 @Data
-public class FileVo {
+public class FileInfo {
     private String name;
     private String path;
     private Boolean isDirectory;
