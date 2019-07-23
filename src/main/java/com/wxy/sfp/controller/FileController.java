@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -21,9 +22,9 @@ import java.util.*;
  * @Date 19-7-17 上午10:55
  * @Description TODO
  **/
-@Controller
+@RestController
 @Slf4j
-public class IndexController {
+public class FileController {
     @Value("${basedir}")
     private String basedir;
 
@@ -34,7 +35,6 @@ public class IndexController {
      * @return
      */
     @GetMapping("/list")
-    @ResponseBody
     public ApiResponse list(@RequestParam(required = false) String path) {
         File file = new File(path == null ? basedir : path);
         if (file.isDirectory() && file.getPath().startsWith(basedir)) {
@@ -93,7 +93,6 @@ public class IndexController {
      * @return
      */
     @GetMapping("/back")
-    @ResponseBody
     public ApiResponse back(@RequestParam String path) {
         File file = new File(path);
         if (file.exists() && file.getPath().startsWith(basedir)) {
