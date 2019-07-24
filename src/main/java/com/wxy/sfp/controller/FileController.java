@@ -25,8 +25,8 @@ import java.util.*;
 @RestController
 @Slf4j
 public class FileController {
-    @Value("${basedir}")
-    private String basedir;
+    @Value("${repository}")
+    private String repository;
 
     /**
      * 读取文件列表
@@ -36,8 +36,8 @@ public class FileController {
      */
     @GetMapping("/list")
     public ApiResponse list(@RequestParam(required = false) String path) {
-        File file = new File(path == null ? basedir : path);
-        if (file.isDirectory() && file.getPath().startsWith(basedir)) {
+        File file = new File(path == null ? repository : path);
+        if (file.isDirectory() && file.getPath().startsWith(repository)) {
             List<FileInfo> list = readList(file);
             log.info("读取文件列表：path = {}", file.getPath());
             Map<String, Object> data = new HashMap<>();
@@ -57,7 +57,7 @@ public class FileController {
     @GetMapping("/download")
     public void download(HttpServletResponse response, @RequestParam String path) throws UnsupportedEncodingException {
         File file = new File(path);
-        if (file.isFile() && file.getPath().startsWith(basedir)) {
+        if (file.isFile() && file.getPath().startsWith(repository)) {
             response.setContentType("application/force-download");// 设置强制下载不打开
             response.addHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(file.getName(), "UTF-8"));// 设置文件名
 
@@ -95,11 +95,11 @@ public class FileController {
     @GetMapping("/back")
     public ApiResponse back(@RequestParam String path) {
         File file = new File(path);
-        if (file.exists() && file.getPath().startsWith(basedir)) {
-            List<FileInfo> list = readList(file.getPath().equals(basedir) ? file : file.getParentFile());
+        if (file.exists() && file.getPath().startsWith(repository)) {
+            List<FileInfo> list = readList(file.getPath().equals(repository) ? file : file.getParentFile());
             log.info("返回上一层：path = {}", file.getPath());
             Map<String, Object> data = new HashMap<>();
-            data.put("path", file.getPath().equals(basedir) ? file.getPath() : file.getParent());
+            data.put("path", file.getPath().equals(repository) ? file.getPath() : file.getParent());
             data.put("list", list);
             return new ApiResponse(1, "success", data);
         }

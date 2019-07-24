@@ -1,2 +1,4 @@
-#port=9010
-#basedir=../repository
+# 配置启动端口
+port=9010
+# 配置仓库地址
+repository=repository

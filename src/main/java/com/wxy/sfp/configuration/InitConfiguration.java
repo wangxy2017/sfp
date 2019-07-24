@@ -17,12 +17,12 @@ import java.io.File;
 @Slf4j
 public class InitConfiguration implements CommandLineRunner {
 
-    @Value("${basedir}")
-    private String basedir;
+    @Value("${repository}")
+    private String repository;
 
     @Override
     public void run(String... args) {
-        File file = new File(basedir);
+        File file = new File(repository);
         if (!file.exists()) {
             boolean mkdir = file.mkdir();
             log.info("初始化文件夹：mkdir = {}", mkdir);

@@ -1,8 +1,9 @@
 #!/bin/sh
 
-PORT=9010
-BASEDIR=../repository
+while read line;do
+    eval "$line"
+done < config
 
-nohup java -Dserver.port=$PORT -Dbasedir=$BASEDIR -jar sfp.jar >/dev/null 2>&1 &
+nohup java -Dserver.port=$port -Drepository=$repository -jar sfp.jar >/dev/null 2>&1 &
 
 echo "started!"
