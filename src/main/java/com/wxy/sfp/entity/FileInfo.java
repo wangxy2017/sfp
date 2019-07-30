@@ -12,4 +12,5 @@ public class FileInfo {
     private String name;
     private String path;
     private Boolean isDirectory;
+    private Long length;
 }

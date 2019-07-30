@@ -114,6 +114,7 @@ public class FileController {
             f.setName(files[i].getName());
             f.setPath(files[i].getPath());
             f.setIsDirectory(files[i].isDirectory());
+            f.setLength(files[i].length());
             list.add(f);
         }
         // 排序
