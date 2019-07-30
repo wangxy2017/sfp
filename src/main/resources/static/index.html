@@ -39,7 +39,7 @@
                 if (isDirectory) {
                     axios.get('/list?path=' + path)
                         .then(function (response) {
-                            console.log(response);
+                            //console.log(response);
                             if (response.data.code == 1) {
                                 table.path = response.data.data.path;
                                 table.files = response.data.data.list;
@@ -52,7 +52,7 @@
             back: function (path) {
                 axios.get('/back?path=' + path)
                     .then(function (response) {
-                        console.log(response);
+                        //console.log(response);
                         if (response.data.code == 1) {
                             table.path = response.data.data.path;
                             table.files = response.data.data.list;
@@ -66,7 +66,7 @@
         mounted: function () {
             axios.get('/list')
                 .then(function (response) {
-                    console.log(response);
+                    //console.log(response);
                     if (response.data.code == 1) {
                         table.path = response.data.data.path;
                         table.files = response.data.data.list;
