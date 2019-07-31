@@ -19,7 +19,7 @@
 <body>
 <table id="list">
     <tr>
-        <td colspan="2">
+        <td colspan="3">
             <span class="title">文件列表</span>
             <button @click="refresh(path)">刷新</button>
         </td>
@@ -27,10 +27,12 @@
     <tr>
         <td><a href="javascript:;" @click="back(path)">..</a></td>
         <td>大小</td>
+        <td>修改日期</td>
     </tr>
     <tr v-for="file in files">
         <td><a href="javascript:;" v-text="file.name" @click="goto(file.isDirectory,file.path)"></a></td>
         <td v-text="change(file.length)"></td>
+        <td v-text="formatDateTime(file.lastModified)"></td>
     </tr>
 </table>
 <script src="js/vue.js"></script>
@@ -89,6 +91,16 @@
                     return sizeStr.substring(0, index) + sizeStr.substr(index + 3, 2)
                 }
                 return size;
+            },
+            formatDateTime: function (time) {
+                var date = new Date(time);
+                var year = date.getFullYear();  //取得4位数的年份
+                var month = date.getMonth() + 1;  //取得日期中的月份，其中0表示1月，11表示12月
+                var day = date.getDate();      //返回日期月份中的天数（1到31）
+                var hour = date.getHours();     //返回日期中的小时数（0到23）
+                var minute = date.getMinutes(); //返回日期中的分钟数（0到59）
+                var second = date.getSeconds(); //返回日期中的秒数（0到59）
+                return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
             }
         },
         mounted: function () {
