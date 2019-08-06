@@ -25,12 +25,15 @@
         </td>
     </tr>
     <tr>
-        <td><a href="javascript:;" @click="back(path)">..</a></td>
+        <td><a href="javascript:;" @click="back(path)">../</a></td>
         <td>大小</td>
         <td>修改日期</td>
     </tr>
     <tr v-for="file in files">
-        <td><a href="javascript:;" v-text="file.name" @click="goto(file.isDirectory,file.path)"></a></td>
+        <td>
+            <a href="javascript:;" v-if="file.isDirectory" v-text="file.name+'/'" @click="goto(file.isDirectory,file.path)"></a>
+            <a href="javascript:;" v-else v-text="file.name" @click="goto(file.isDirectory,file.path)"></a>
+        </td>
         <td v-text="change(file.length)"></td>
         <td v-text="formatDateTime(file.lastModified)"></td>
     </tr>
