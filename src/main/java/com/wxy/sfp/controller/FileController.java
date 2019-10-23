@@ -3,13 +3,14 @@ package com.wxy.sfp.controller;
 import com.wxy.sfp.entity.ApiResponse;
 import com.wxy.sfp.entity.FileInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -49,6 +50,34 @@ public class FileController {
     }
 
     /**
+     * 上传文件
+     *
+     * @param file
+     * @param path
+     * @return
+     */
+    @PostMapping("/upload")
+    public ApiResponse upload(@RequestParam("file") MultipartFile file, @RequestParam String path) {
+        String filename = file.getOriginalFilename();
+        File filePath = new File(StringUtils.isBlank(path) ? repository : path);
+        if (filePath.exists()) {
+            try {
+                File dest = new File(filePath.getPath() + File.separator + filename);
+                if (!dest.exists()) {
+                    dest.createNewFile();
+                }
+                file.transferTo(dest);
+                return new ApiResponse(1, "success", "上传成功");
+            } catch (IOException e) {
+                log.error("上传失败:{}", e.getMessage());
+                return new ApiResponse(1, "error", "上传失败");
+            }
+        } else {
+            throw new IllegalArgumentException("参数不合法:" + path);
+        }
+    }
+
+    /**
      * 下载
      *
      * @param response
@@ -75,14 +104,13 @@ public class FileController {
                 }
                 log.info("下载文件：file = {}", file.getPath());
             } catch (IOException e) {
-                e.printStackTrace();
-                log.error("下载异常：{}", e.getLocalizedMessage());
+                log.error("下载异常：{}", e.getMessage());
             } finally {
                 IOUtils.closeQuietly(fis);
                 IOUtils.closeQuietly(bis);
             }
         } else {
-            throw new RuntimeException("文件读取异常 path = " + path);
+            throw new RuntimeException("文件读取异常:" + path);
         }
     }
 
@@ -97,7 +125,6 @@ public class FileController {
         File file = new File(path);
         if (file.exists() && file.getPath().startsWith(repository)) {
             List<FileInfo> list = readList(file.getPath().equals(repository) ? file : file.getParentFile());
-            log.info("返回上一层：path = {}", file.getPath());
             Map<String, Object> data = new HashMap<>();
             data.put("path", file.getPath().equals(repository) ? file.getPath() : file.getParent());
             data.put("list", list);

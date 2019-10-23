@@ -25,7 +25,7 @@ public class InitConfiguration implements CommandLineRunner {
         File file = new File(repository);
         if (!file.exists()) {
             boolean mkdir = file.mkdirs();
-            log.info("初始化文件夹：mkdir = {}", mkdir);
+            log.info("初始化文件夹：{}", mkdir);
         }
     }
 }
