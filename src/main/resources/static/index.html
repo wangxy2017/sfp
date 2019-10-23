@@ -38,8 +38,11 @@
 <table id="list">
     <tr>
         <td colspan="3" style="border-bottom: 1px solid #000;padding: 10px 0;">
+            <input type="file" name="file" id="file" style="display: none" @change="doUpload(path)">
             <span class="title">文件列表</span>
-            <button @click="refresh(path)">刷新</button>
+            <button @click="upload()">上传</button>
+            <input type="text" name="folderName" id="folderName" style="width: 120px">
+            <button @click="newFolder(path)">新建文件夹</button>
         </td>
     </tr>
     <tr>
@@ -128,6 +131,37 @@
                 var minute = date.getMinutes(); //返回日期中的分钟数（0到59）
                 var second = date.getSeconds(); //返回日期中的秒数（0到59）
                 return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
+            },
+            upload: function () {
+                document.getElementById("file").click();
+            },
+            doUpload: function (path) {
+                var param = new FormData();
+                param.append("path", path);
+                param.append("file", document.getElementById("file").files[0]);
+                axios.post('/upload', param, {headers: {"Content-Type": "multipart/form-data"}}).then(
+                    function (response) {
+                        if (response.data.code == 1) {
+                            table.refresh(path);
+                        } else {
+                            alert("上传失败");
+                        }
+                    })
+                    .catch(function (error) {
+                        alert("上传失败");
+                    });
+            },
+            newFolder: function (path) {
+                var folderName = document.getElementById("folderName").value;
+                if (folderName == "") {
+                    return false;
+                }
+                axios.get('/new?path=' + path + "/" + folderName)
+                    .then(function (response) {
+                        if (response.data.code == 1) {
+                            table.refresh(path);
+                        }
+                    });
             }
         },
         mounted: function () {

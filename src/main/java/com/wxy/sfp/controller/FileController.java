@@ -37,16 +37,33 @@ public class FileController {
      */
     @GetMapping("/list")
     public ApiResponse list(@RequestParam(required = false) String path) {
-        File file = new File(path == null ? repository : path);
+        File file = new File(StringUtils.isBlank(path) ? repository : path);
         if (file.isDirectory() && file.getPath().startsWith(repository)) {
             List<FileInfo> list = readList(file);
-            log.info("读取文件列表：path = {}", file.getPath());
             Map<String, Object> data = new HashMap<>();
             data.put("path", file.getPath());
             data.put("list", list);
             return new ApiResponse(1, "success", data);
         }
-        return new ApiResponse(-1, "error", null);
+        return new ApiResponse(-1, "error", "路径错误");
+    }
+
+    /**
+     * 新建文件夹
+     *
+     * @param path
+     * @return
+     */
+    @GetMapping("/new")
+    public ApiResponse newFolder(@RequestParam String path) {
+        if (StringUtils.isNotBlank(path) && path.startsWith(repository)) {
+            File file = new File(path);
+            if (!file.exists()) {
+                file.mkdir();
+                return new ApiResponse(1, "success", "新建成功");
+            }
+        }
+        return new ApiResponse(-1, "error", "新建失败");
     }
 
     /**
@@ -58,22 +75,24 @@ public class FileController {
      */
     @PostMapping("/upload")
     public ApiResponse upload(@RequestParam("file") MultipartFile file, @RequestParam String path) {
-        String filename = file.getOriginalFilename();
-        File filePath = new File(StringUtils.isBlank(path) ? repository : path);
-        if (filePath.exists()) {
-            try {
-                File dest = new File(filePath.getPath() + File.separator + filename);
-                if (!dest.exists()) {
-                    dest.createNewFile();
+        if (!file.isEmpty()) {
+            String filename = file.getOriginalFilename();
+            File filepath = new File(StringUtils.isBlank(path) ? repository : path);
+            if (filepath.exists()) {
+                File dest = new File(filepath.getPath() + File.separator + filename);
+                try {
+                    OutputStream os = new FileOutputStream(dest);
+                    os.write(file.getBytes());
+                    return new ApiResponse(1, "success", "上传成功");
+                } catch (IOException e) {
+                    log.error("上传失败:{}", e.getMessage());
+                    return new ApiResponse(1, "error", "上传失败");
                 }
-                file.transferTo(dest);
-                return new ApiResponse(1, "success", "上传成功");
-            } catch (IOException e) {
-                log.error("上传失败:{}", e.getMessage());
-                return new ApiResponse(1, "error", "上传失败");
+            } else {
+                throw new IllegalArgumentException("参数不合法:" + path);
             }
         } else {
-            throw new IllegalArgumentException("参数不合法:" + path);
+            return new ApiResponse(-1, "error", "上传失败，请选择文件");
         }
     }
 
@@ -137,13 +156,14 @@ public class FileController {
         File[] files = file.listFiles();
         List<FileInfo> list = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
-            FileInfo f = new FileInfo();
-            f.setName(files[i].getName());
-            f.setPath(files[i].getPath());
-            f.setIsDirectory(files[i].isDirectory());
-            f.setLength(files[i].length());
-            f.setLastModified(files[i].lastModified());
-            list.add(f);
+            FileInfo info = FileInfo.builder()
+                    .name(files[i].getName())
+                    .path(files[i].getPath())
+                    .isDirectory(files[i].isDirectory())
+                    .length(files[i].length())
+                    .lastModified(files[i].lastModified())
+                    .build();
+            list.add(info);
         }
         // 排序
         list.sort(Comparator.comparing(FileInfo::getName));

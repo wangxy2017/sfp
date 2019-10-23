@@ -1,5 +1,6 @@
 package com.wxy.sfp.entity;
 
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Data;
  * @Description TODO
  **/
 @Data
+@Builder
 public class FileInfo {
     private String name;
     private String path;
