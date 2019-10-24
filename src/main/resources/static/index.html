@@ -12,11 +12,11 @@
         }
 
         td {
-            width: 320px;
+            width: 320px;/*需要配合宽度来使用*/
+            overflow: hidden;/*超出部分隐藏*/
+            text-overflow: ellipsis;/* 超出部分显示省略号 */
+            white-space: nowrap;/*规定段落中的文本不进行换行 */
             line-height: 26px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
         a {
