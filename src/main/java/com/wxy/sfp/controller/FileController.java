@@ -19,6 +19,7 @@ import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author wxy
@@ -30,7 +31,6 @@ import java.util.*;
 public class FileController {
     @Value("${repository}")
     private String repository;
-
 
     /**
      * 删除目录或文件
@@ -57,10 +57,15 @@ public class FileController {
      * @return
      */
     @GetMapping("/list")
-    public ApiResponse list(@RequestParam(required = false) String path) {
-        File file = new File(StringUtils.isBlank(path) ? repository : path);
-        if (file.isDirectory() && file.getPath().startsWith(repository)) {
+    public ApiResponse list(@RequestParam(required = false) String path, @RequestParam(required = false) String name) {
+        path = StringUtils.isBlank(path) ? repository : path;
+        File file = new File(path);
+        if (file.exists() && file.isDirectory() && file.getPath().startsWith(repository)) {
             List<FileInfo> list = readList(file);
+            // 搜索
+            if (StringUtils.isNotBlank(name)) {
+                list = list.stream().filter(f -> f.getName().contains(name)).collect(Collectors.toList());
+            }
             Map<String, Object> data = new HashMap<>();
             data.put("path", file.getPath());
             data.put("list", list);

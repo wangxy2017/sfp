@@ -49,12 +49,17 @@
         </td>
     </tr>
     <tr>
-        <td colspan="3" style="padding: 10px 0;">
+        <td colspan="4" style="padding: 10px 0;">
             <a class="up" href="javascript:;" @click="back(path)">[上级目录]</a>
         </td>
     </tr>
     <tr>
-        <td>名称</td>
+        <td>
+            搜索：<input type="text" name="searchName" id="searchName" placeholder="输入文件名称" @keyup.enter="searchFile()">
+        </td>
+    </tr>
+    <tr>
+        <td>文件/目录</td>
         <td>大小</td>
         <td>修改日期</td>
         <td>操作</td>
@@ -80,16 +85,19 @@
             files: []
         },
         methods: {
+            loadList: function (path, name) {
+                axios.get('/list?path=' + path + '&name=' + name)
+                    .then(function (response) {
+                        //console.log(response);
+                        if (response.data.code == 1) {
+                            table.path = response.data.data.path;
+                            table.files = response.data.data.list;
+                        }
+                    });
+            },
             goto: function (isDirectory, path) {
                 if (isDirectory) {
-                    axios.get('/list?path=' + path)
-                        .then(function (response) {
-                            //console.log(response);
-                            if (response.data.code == 1) {
-                                table.path = response.data.data.path;
-                                table.files = response.data.data.list;
-                            }
-                        });
+                    table.loadList(path, "");
                 } else {
                     window.location.href = "/download?path=" + path;
                 }
@@ -208,6 +216,13 @@
                             alert("服务器异常");
                         });
                 }
+            },
+            /**
+             * 搜索文件
+             */
+            searchFile: function () {
+                var searchName = document.getElementById("searchName").value;
+                table.loadList(table.path, searchName);
             }
         },
         mounted: function () {
