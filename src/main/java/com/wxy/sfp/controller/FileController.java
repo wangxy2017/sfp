@@ -2,6 +2,7 @@ package com.wxy.sfp.controller;
 
 import com.wxy.sfp.entity.ApiResponse;
 import com.wxy.sfp.entity.FileInfo;
+import com.wxy.sfp.util.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -42,8 +43,8 @@ public class FileController {
     public ApiResponse delete(@RequestParam String path) {
         if (StringUtils.isNotBlank(path) && !path.equals(repository)) {
             File file = new File(path);
-            if (file.exists() && file.delete()) {
-                log.error("删除文件：{}，时间：{}", path, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            if (file.exists() && deleteFile(file)) {
+                log.error("删除文件：{}，时间：{},IP：{}", path, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                 return new ApiResponse(1, "success", "删除成功");
             }
         }
@@ -76,11 +77,13 @@ public class FileController {
      * @return
      */
     @GetMapping("/new")
-    public ApiResponse newFolder(@RequestParam String path) {
-        if (StringUtils.isNotBlank(path) && path.startsWith(repository)) {
-            File file = new File(path);
+    public ApiResponse newFolder(@RequestParam String path, @RequestParam String name) {
+        File parent = new File(path);
+        if (parent.exists() && StringUtils.isNotBlank(name)) {
+            File file = new File(parent.getPath() + File.separator + name);
             if (!file.exists()) {
                 file.mkdir();
+                log.error("新建文件夹：{}，时间：{},IP：{}", file.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                 return new ApiResponse(1, "success", "新建成功");
             }
         }
@@ -104,6 +107,7 @@ public class FileController {
                 try {
                     OutputStream os = new FileOutputStream(dest);
                     os.write(file.getBytes());
+                    log.error("上传文件：{}，时间：{},IP：{}", dest.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                     return new ApiResponse(1, "success", "上传成功");
                 } catch (IOException e) {
                     log.error("上传失败:{}", e.getMessage());
@@ -118,7 +122,7 @@ public class FileController {
     }
 
     /**
-     * 下载
+     * 下载文件
      *
      * @param response
      * @param path
@@ -126,7 +130,7 @@ public class FileController {
     @GetMapping("/download")
     public void download(HttpServletResponse response, @RequestParam String path) throws UnsupportedEncodingException {
         File file = new File(path);
-        if (file.isFile() && file.getPath().startsWith(repository)) {
+        if (file.exists() && file.isFile() && file.getPath().startsWith(repository)) {
             response.setContentType("application/force-download");// 设置强制下载不打开
             response.addHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(file.getName(), "UTF-8"));// 设置文件名
 
@@ -142,7 +146,7 @@ public class FileController {
                     os.write(buffer, 0, i);
                     i = bis.read(buffer);
                 }
-                log.info("下载文件：file = {}", file.getPath());
+                log.error("下载文件：{}，时间：{},IP：{}", file.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
             } catch (IOException e) {
                 log.error("下载异常：{}", e.getMessage());
             } finally {
@@ -176,18 +180,31 @@ public class FileController {
     private List<FileInfo> readList(File file) {
         File[] files = file.listFiles();
         List<FileInfo> list = new ArrayList<>();
-        for (int i = 0; i < files.length; i++) {
+        for (File value : files) {
             FileInfo info = FileInfo.builder()
-                    .name(files[i].getName())
-                    .path(files[i].getPath())
-                    .isDirectory(files[i].isDirectory())
-                    .length(files[i].length())
-                    .lastModified(files[i].lastModified())
+                    .name(value.getName())
+                    .path(value.getPath())
+                    .isDirectory(value.isDirectory())
+                    .length(value.length())
+                    .lastModified(value.lastModified())
                     .build();
             list.add(info);
         }
         // 排序
         list.sort(Comparator.comparing(FileInfo::getName));
         return list;
+    }
+
+    private boolean deleteFile(File file) {
+        if (!file.exists()) {
+            return false;
+        }
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            for (File f : files) {
+                deleteFile(f);
+            }
+        }
+        return file.delete();
     }
 }
