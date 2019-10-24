@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
@@ -104,15 +103,29 @@ public class FileController {
             File filepath = new File(StringUtils.isBlank(path) ? repository : path);
             if (filepath.exists()) {
                 File dest = new File(filepath.getPath() + File.separator + filename);
+                InputStream is = null;
+                BufferedInputStream bis = null;
+                OutputStream os = null;
                 try {
-                    OutputStream os = new FileOutputStream(dest);
-                    os.write(file.getBytes());
+                    is = file.getInputStream();
+                    bis = new BufferedInputStream(is);
+                    os = new FileOutputStream(dest);
+                    byte[] buffer = new byte[1024 * 1024 * 10];
+                    int i = bis.read(buffer);
+                    while (i != -1) {
+                        os.write(buffer, 0, i);
+                        i = bis.read(buffer);
+                    }
                     log.error("上传文件：{}，时间：{},IP：{}", dest.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                     return new ApiResponse(1, "success", "上传成功");
                 } catch (IOException e) {
                     log.error("上传失败:{}", e.getMessage());
-                    return new ApiResponse(1, "error", "上传失败");
+                } finally {
+                    IOUtils.closeQuietly(is);
+                    IOUtils.closeQuietly(bis);
+                    IOUtils.closeQuietly(os);
                 }
+                return new ApiResponse(1, "error", "上传失败");
             } else {
                 throw new IllegalArgumentException("参数不合法:" + path);
             }
@@ -134,13 +147,13 @@ public class FileController {
             response.setContentType("application/force-download");// 设置强制下载不打开
             response.addHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(file.getName(), "UTF-8"));// 设置文件名
 
-            byte[] buffer = new byte[1024 * 10];
+            byte[] buffer = new byte[1024 * 1024 * 10];
             FileInputStream fis = null;
             BufferedInputStream bis = null;
             try {
                 fis = new FileInputStream(file);
                 bis = new BufferedInputStream(fis);
-                ServletOutputStream os = response.getOutputStream();
+                OutputStream os = response.getOutputStream();
                 int i = bis.read(buffer);
                 while (i != -1) {
                     os.write(buffer, 0, i);
