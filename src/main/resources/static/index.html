@@ -44,7 +44,6 @@
             <input type="file" name="file" id="file" style="display: none" @change="doUpload(path)">
             <span class="title">文件列表</span>
             <button @click="upload()">上传</button>
-            <input type="text" name="folderName" id="folderName" style="width: 120px">
             <button @click="newFolder(path)">新建文件夹</button>
             <span style="color: #666">(* 文件名或文件夹不要有空格)</span>
         </td>
@@ -158,31 +157,32 @@
                     });
             },
             newFolder: function (path) {
-                var folderName = document.getElementById("folderName").value;
-                if (folderName == "") {
+                var name = window.prompt("文件夹名称：");
+                if (typeof name == "undefined") {
                     return false;
                 }
-                axios.get('/new?path=' + path + "/" + folderName)
+                axios.get('/new?path=' + path + "/" + name)
                     .then(function (response) {
                         if (response.data.code == 1) {
                             table.refresh(path);
-                            document.getElementById("file").value = "";
                         }
                     })
                     .catch(function (error) {
                         alert("服务器异常");
                     });
             },
-            remove:function (path) {
-                axios.get('/delete?path=' + path)
-                    .then(function (response) {
-                        if (response.data.code == 1) {
-                            table.refresh(table.path);
-                        }
-                    })
-                    .catch(function (error) {
-                        alert("服务器异常");
-                    });
+            remove: function (path) {
+                if (window.confirm("危险操作，是否继续？")) {
+                    axios.get('/delete?path=' + path)
+                        .then(function (response) {
+                            if (response.data.code == 1) {
+                                table.refresh(table.path);
+                            }
+                        })
+                        .catch(function (error) {
+                            alert("服务器异常");
+                        });
+                }
             }
         },
         mounted: function () {
