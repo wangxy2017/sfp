@@ -158,7 +158,7 @@
             },
             newFolder: function (path) {
                 var name = window.prompt("文件夹名称：");
-                if (typeof name == "undefined") {
+                if (name == null || typeof name == "undefined") {
                     return false;
                 }
                 axios.get('/new?path=' + path + "/" + name)
