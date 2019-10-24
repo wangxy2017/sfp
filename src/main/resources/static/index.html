@@ -12,10 +12,10 @@
         }
 
         td {
-            width: 320px;/*需要配合宽度来使用*/
-            overflow: hidden;/*超出部分隐藏*/
-            text-overflow: ellipsis;/* 超出部分显示省略号 */
-            white-space: nowrap;/*规定段落中的文本不进行换行 */
+            width: 320px; /*需要配合宽度来使用*/
+            overflow: hidden; /*超出部分隐藏*/
+            text-overflow: ellipsis; /* 超出部分显示省略号 */
+            white-space: nowrap; /*规定段落中的文本不进行换行 */
             line-height: 26px;
         }
 
@@ -221,6 +221,21 @@
                 });
         }
     });
+    // 监听刷新或强制刷新
+    document.onkeydown = function (ev) {
+        if (ev.key === "F5" || (ev.ctrlKey && ev.key === "F5") || (ev.ctrlKey && ev.key === "r")) {
+            var uploadBtn = document.getElementById("uploadBtn");
+            if (uploadBtn.innerHTML !== "上传") {
+                var bool = window.confirm("当前正在上传文件，是否取消？");
+                if (!bool) {
+                    ev.key = null;
+                    ev.returnValue = false;
+                    ev.cancelBubble = true;
+                    return false;
+                }
+            }
+        }
+    };
 </script>
 </body>
 </html>
