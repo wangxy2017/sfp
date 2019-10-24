@@ -16,6 +16,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -28,6 +30,25 @@ import java.util.*;
 public class FileController {
     @Value("${repository}")
     private String repository;
+
+
+    /**
+     * 删除目录或文件
+     *
+     * @param path
+     * @return
+     */
+    @GetMapping("/delete")
+    public ApiResponse delete(@RequestParam String path) {
+        if (StringUtils.isNotBlank(path) && !path.equals(repository)) {
+            File file = new File(path);
+            if (file.exists() && file.delete()) {
+                log.error("删除文件：{}，时间：{}", path, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                return new ApiResponse(1, "success", "删除成功");
+            }
+        }
+        return new ApiResponse(-1, "error", "非法操作");
+    }
 
     /**
      * 读取文件列表
