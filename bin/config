@@ -1,4 +1,0 @@
-# 配置启动端口
-port=9010
-# 配置仓库地址
-repository=repository
