@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="log_dir" value="logs" />
+    <property name="logDir" value="logs" />
     <property name="maxFileSize" value="50MB" />
     <property name="maxHistory" value="180" />
 
@@ -17,7 +17,7 @@
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 按天回滚 daily -->
-            <fileNamePattern>${log_dir}/error-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <fileNamePattern>${logDir}/error-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <!-- 日志最大的历史 180天 -->
             <maxHistory>${maxHistory}</maxHistory>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
