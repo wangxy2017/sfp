@@ -156,9 +156,16 @@
              * @param path
              */
             doUpload: function (path) {
+                var fileInput = document.getElementById("file");
+                // 判断强制覆盖
+                table.files.forEach(function (f) {
+                    if (f.name === fileInput.files[0].name && !window.confirm("文件已上传，是否强制覆盖?")) {
+                        return false;
+                    }
+                });
                 var param = new FormData();
                 param.append("path", path);
-                param.append("file", document.getElementById("file").files[0]);
+                param.append("file", fileInput.files[0]);
                 // 发送请求
                 var xhr = new XMLHttpRequest();
                 xhr.open('post', '/upload', true);
