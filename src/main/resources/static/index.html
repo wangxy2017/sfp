@@ -179,7 +179,7 @@
                             var uploadBtn = document.getElementById("uploadBtn");
                             uploadBtn.innerHTML = percent + "%";
                             if (percent === 100) {
-                                uploadBtn.innerHTML = "上传";
+                                uploadBtn.innerHTML = "请等待...";
                             }
                         }
                     };
@@ -196,6 +196,9 @@
                             } else {
                                 alert("上传失败");
                             }
+                            // 恢复按钮
+                            var uploadBtn = document.getElementById("uploadBtn");
+                            uploadBtn.innerHTML = "上传";
                         }
                     };
                 }
