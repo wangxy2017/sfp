@@ -45,7 +45,7 @@
             <span class="title">文件列表</span>
             <button @click="upload()" id="uploadBtn">上传</button>
             <button @click="newFolder(path)">新建文件夹</button>
-            <span style="color: #666">(* 文件名或文件夹不要有空格)</span>
+            <span style="color: #666">(* 文件名或文件夹不要有空格，单个文件最大上传10G)</span>
         </td>
     </tr>
     <tr>
@@ -55,7 +55,7 @@
     </tr>
     <tr>
         <td colspan="4">
-            搜索：<input type="text" name="searchName" id="searchName" placeholder="输入文件名称" @keyup.enter="searchFile()">
+            搜索：<input type="text" name="searchName" id="searchName" placeholder="输入文件或目录名称" @keyup.enter="searchFile()">
         </td>
     </tr>
     <tr>
