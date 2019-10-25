@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property name="logDir" value="logs" />
-    <property name="maxFileSize" value="50MB" />
-    <property name="maxHistory" value="180" />
 
     <!-- 控制台输出 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -17,12 +15,12 @@
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 按天回滚 daily -->
-            <fileNamePattern>${logDir}/error-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <fileNamePattern>${logDir}/error/%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <!-- 日志最大的历史 180天 -->
-            <maxHistory>${maxHistory}</maxHistory>
+            <maxHistory>180</maxHistory>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <!-- maxFileSize:这是活动文件的大小，默认值是10MB，这里设置为50MB -->
-                <maxFileSize>${maxFileSize}</maxFileSize>
+                <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
