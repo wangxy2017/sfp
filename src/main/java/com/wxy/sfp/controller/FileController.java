@@ -33,6 +33,29 @@ public class FileController {
     private String repository;
 
     /**
+     * 修改目录或文件
+     *
+     * @param path
+     * @param oldName
+     * @param newName
+     * @return
+     */
+    @GetMapping("/rename")
+    public ApiResponse rename(@RequestParam String path, @RequestParam String oldName, @RequestParam String newName) {
+        File folder = new File(path);
+        File file = new File(folder.getPath() + File.separator + oldName);
+        File file1 = new File(folder.getPath() + File.separator + newName);
+        if (folder.exists() && file.exists() && !file1.exists()) {
+            boolean b = file.renameTo(file1);
+            if (b) {
+                log.error("修改目录或文件：[{}]renameTo[{}]，时间：{},IP：{}", file.getPath(), file1.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
+                return new ApiResponse(1, "success", "修改成功");
+            }
+        }
+        return new ApiResponse(-1, "error", "修改失败");
+    }
+
+    /**
      * 删除目录或文件
      *
      * @param path

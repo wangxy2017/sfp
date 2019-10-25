@@ -54,7 +54,7 @@
         </td>
     </tr>
     <tr>
-        <td>
+        <td colspan="4">
             搜索：<input type="text" name="searchName" id="searchName" placeholder="输入文件名称" @keyup.enter="searchFile()">
         </td>
     </tr>
@@ -72,7 +72,10 @@
         </td>
         <td v-text="change(file.length)"></td>
         <td v-text="formatDateTime(file.lastModified)"></td>
-        <td><a href="javascript:;" @click="remove(file.path)" style="padding-left: 0">删除</a></td>
+        <td>
+            <a href="javascript:;" @click="rename(path,file.name)" style="padding-left: 0">修改</a>
+            <a href="javascript:;" @click="remove(file.path)" style="padding-left: 0">删除</a>
+        </td>
     </tr>
 </table>
 <script src="js/vue.js"></script>
@@ -237,6 +240,23 @@
             searchFile: function () {
                 var searchName = document.getElementById("searchName").value;
                 table.loadList(table.path, searchName);
+            },
+            /**
+             * 修改目录或文件
+             * @param path
+             * @param name
+             */
+            rename: function (path, name) {
+                console.log(path, name);
+                var newName = window.prompt("目录或文件名称：",name);
+                if (newName != null && typeof newName != "undefined") {
+                    axios.get('/rename?path=' + path + '&oldName=' + name + '&newName=' + newName)
+                        .then(function (response) {
+                            if (response.data.code == 1) {
+                                table.refresh(path);
+                            }
+                        });
+                }
             }
         },
         mounted: function () {
