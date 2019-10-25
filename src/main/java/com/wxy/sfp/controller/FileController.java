@@ -125,12 +125,12 @@ public class FileController {
                     return new ApiResponse(1, "success", "上传成功");
                 } catch (IOException e) {
                     log.error("上传失败:{}", e.getMessage());
+                    return new ApiResponse(1, "error", "上传失败");
                 } finally {
                     IOUtils.closeQuietly(is);
                     IOUtils.closeQuietly(bis);
                     IOUtils.closeQuietly(os);
                 }
-                return new ApiResponse(1, "error", "上传失败");
             } else {
                 throw new IllegalArgumentException("参数不合法:" + path);
             }
