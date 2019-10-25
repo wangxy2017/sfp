@@ -157,44 +157,48 @@
              */
             doUpload: function (path) {
                 var fileInput = document.getElementById("file");
+                var flag = true;
                 // 判断强制覆盖
                 table.files.forEach(function (f) {
                     if (f.name === fileInput.files[0].name && !window.confirm("文件已上传，是否强制覆盖?")) {
+                        flag = false;
                         return false;
                     }
                 });
-                var param = new FormData();
-                param.append("path", path);
-                param.append("file", fileInput.files[0]);
-                // 发送请求
-                var xhr = new XMLHttpRequest();
-                xhr.open('post', '/upload', true);
-                xhr.upload.onprogress = function (ev) {
-                    var percent = 0;
-                    if (ev.lengthComputable) {
-                        percent = Math.round(100 * ev.loaded / ev.total);
-                        var uploadBtn = document.getElementById("uploadBtn");
-                        uploadBtn.innerHTML = percent + "%";
-                        if (percent === 100) {
-                            uploadBtn.innerHTML = "上传";
+                if (flag) {
+                    var param = new FormData();
+                    param.append("path", path);
+                    param.append("file", fileInput.files[0]);
+                    // 发送请求
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('post', '/upload', true);
+                    xhr.upload.onprogress = function (ev) {
+                        var percent = 0;
+                        if (ev.lengthComputable) {
+                            percent = Math.round(100 * ev.loaded / ev.total);
+                            var uploadBtn = document.getElementById("uploadBtn");
+                            uploadBtn.innerHTML = percent + "%";
+                            if (percent === 100) {
+                                uploadBtn.innerHTML = "上传";
+                            }
                         }
-                    }
-                };
-                xhr.onerror = function (ev) {
-                    document.getElementById("uploadBtn").innerHTML = "上传";
-                    alert("服务器异常");
-                };
-                xhr.send(param);
-                xhr.onreadystatechange = function (ev) {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        var data = JSON.parse(xhr.response);
-                        if (data.code == 1) {
-                            table.refresh(path);
-                        } else {
-                            alert("上传失败");
+                    };
+                    xhr.onerror = function (ev) {
+                        document.getElementById("uploadBtn").innerHTML = "上传";
+                        alert("服务器异常");
+                    };
+                    xhr.send(param);
+                    xhr.onreadystatechange = function (ev) {
+                        if (xhr.readyState === 4 && xhr.status === 200) {
+                            var data = JSON.parse(xhr.response);
+                            if (data.code == 1) {
+                                table.refresh(path);
+                            } else {
+                                alert("上传失败");
+                            }
                         }
-                    }
-                };
+                    };
+                }
             },
             newFolder: function (path) {
                 var name = window.prompt("文件夹名称：");
