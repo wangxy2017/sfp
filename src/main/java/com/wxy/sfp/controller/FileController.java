@@ -85,9 +85,9 @@ public class FileController {
         File file = new File(path);
         if (file.exists() && file.isDirectory() && file.getPath().startsWith(repository)) {
             List<FileInfo> list = readList(file);
-            // 搜索
+            // 搜索(忽略大小写)
             if (StringUtils.isNotBlank(name)) {
-                list = list.stream().filter(f -> f.getName().contains(name)).collect(Collectors.toList());
+                list = list.stream().filter(f -> f.getName().toLowerCase().contains(name)).collect(Collectors.toList());
             }
             Map<String, Object> data = new HashMap<>();
             data.put("path", file.getPath());
