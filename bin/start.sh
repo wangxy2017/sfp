@@ -1,5 +1,5 @@
 #!/bin/bash
 
-nohup java -jar sfp.jar >/dev/null 2>&1 &
+nohup java -jar sfp.jar > console.log &
 
 echo "started!"
