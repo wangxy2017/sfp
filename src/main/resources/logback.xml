@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="logDir" value="logs" />
-
+    <property name="log_dir" value="logs"/>
     <!-- 控制台输出 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -10,12 +9,35 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
-
-    <!-- ERROR -->
+    <!-- INFO日志输出 -->
+    <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 按天回滚 daily -->
+            <fileNamePattern>${log_dir}/info/%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <!-- 日志最大的历史 180天 -->
+            <maxHistory>180</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- maxFileSize:这是活动文件的大小，默认值是10MB，这里设置为50MB -->
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%date{yyyy-MM-dd HH:mm:ss} | %highlight(%-5level) | %thread | %logger | %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <!-- 只打印INFO日志 -->
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <!-- ERROR日志输出 -->
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 按天回滚 daily -->
-            <fileNamePattern>${logDir}/error/%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <fileNamePattern>${log_dir}/error/%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <!-- 日志最大的历史 180天 -->
             <maxHistory>180</maxHistory>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -37,9 +59,9 @@
     </appender>
 
     <!--控制台和日志文件输出级别-->
-    <root level="INFO" additivity = "false">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="ERROR" />
+    <root level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="INFO"/>
+        <appender-ref ref="ERROR"/>
     </root>
-
 </configuration>
