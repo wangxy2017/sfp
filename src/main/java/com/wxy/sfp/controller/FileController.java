@@ -48,7 +48,7 @@ public class FileController {
         if (folder.exists() && file.exists() && !file1.exists()) {
             boolean b = file.renameTo(file1);
             if (b) {
-                log.error("修改目录或文件：[{}]renameTo[{}]，时间：{},IP：{}", file.getPath(), file1.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
+                log.info("修改目录或文件：[{}]renameTo[{}]，时间：{},IP：{}", file.getPath(), file1.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                 return new ApiResponse(1, "success", "修改成功");
             }
         }
@@ -66,7 +66,7 @@ public class FileController {
         if (StringUtils.isNotBlank(path) && !path.equals(repository)) {
             File file = new File(path);
             if (file.exists() && deleteFile(file)) {
-                log.error("删除文件：{}，时间：{},IP：{}", path, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
+                log.info("删除文件：{}，时间：{},IP：{}", path, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                 return new ApiResponse(1, "success", "删除成功");
             }
         }
@@ -110,7 +110,7 @@ public class FileController {
             File file = new File(parent.getPath() + File.separator + name);
             if (!file.exists()) {
                 file.mkdir();
-                log.error("新建文件夹：{}，时间：{},IP：{}", file.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
+                log.info("新建文件夹：{}，时间：{},IP：{}", file.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                 return new ApiResponse(1, "success", "新建成功");
             }
         }
@@ -144,7 +144,7 @@ public class FileController {
                         os.write(buffer, 0, i);
                         i = bis.read(buffer);
                     }
-                    log.error("上传文件：{}，时间：{},IP：{}", dest.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
+                    log.info("上传文件：{}，时间：{},IP：{}", dest.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                     return new ApiResponse(1, "success", "上传成功");
                 } catch (IOException e) {
                     log.error("上传失败:{}", e.getMessage());
@@ -187,7 +187,7 @@ public class FileController {
                     os.write(buffer, 0, i);
                     i = bis.read(buffer);
                 }
-                log.error("下载文件：{}，时间：{},IP：{}", file.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
+                log.info("下载文件：{}，时间：{},IP：{}", file.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
             } catch (IOException e) {
                 log.error("下载异常：{}", e.getMessage());
             } finally {
