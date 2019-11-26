@@ -1,6 +1,7 @@
 package com.wxy.sfp.exception;
 
 import com.wxy.sfp.entity.ApiResponse;
+import com.wxy.sfp.util.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,10 +15,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    @ExceptionHandler()
+    @ExceptionHandler
     @ResponseBody
     public ApiResponse exceptionHandle(Exception e) {
-        log.error("系统错误：{}", e.getMessage());
+        log.error("系统错误：{}，IP地址：{}", e.getMessage(), IPUtils.getRemoteIp());
         return new ApiResponse(500, "系统错误", null);
     }
 }
