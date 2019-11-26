@@ -1,7 +1,7 @@
 package com.wxy.sfp.controller;
 
 import com.wxy.sfp.entity.ApiResponse;
-import com.wxy.sfp.entity.FileInfo;
+import com.wxy.sfp.entity.FileInfoVo;
 import com.wxy.sfp.util.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
 /**
  * @Author wxy
  * @Date 19-7-17 上午10:55
- * @Description TODO
+ * @Description TODO 文件操作控制器
  **/
 @RestController
 @Slf4j
 public class FileController {
-    @Value("${repository}")
+    @Value("${repository:repository}")
     private String repository;
 
     /**
@@ -81,10 +81,10 @@ public class FileController {
      */
     @GetMapping("/list")
     public ApiResponse list(@RequestParam(required = false) String path, @RequestParam(required = false) String name) {
-        path = StringUtils.isBlank(path) ? repository : path;
-        File file = new File(path);
+        String filepath = StringUtils.isBlank(path) ? repository : path;
+        File file = new File(filepath);
         if (file.exists() && file.isDirectory() && file.getPath().startsWith(repository)) {
-            List<FileInfo> list = readList(file);
+            List<FileInfoVo> list = readList(file);
             // 搜索(忽略大小写)
             if (StringUtils.isNotBlank(name)) {
                 list = list.stream().filter(f -> f.getName().toLowerCase().contains(name)).collect(Collectors.toList());
@@ -147,7 +147,7 @@ public class FileController {
                     log.info("上传文件：{}，时间：{},IP：{}", dest.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                     return new ApiResponse(1, "success", "上传成功");
                 } catch (IOException e) {
-                    log.error("上传失败:{}", e.getMessage());
+                    log.error("上传失败:{}，IP地址：{}", e.getMessage(), IPUtils.getRemoteIp());
                     return new ApiResponse(1, "error", "上传失败");
                 } finally {
                     IOUtils.closeQuietly(is);
@@ -189,7 +189,7 @@ public class FileController {
                 }
                 log.info("下载文件：{}，时间：{},IP：{}", file.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
             } catch (IOException e) {
-                log.error("下载异常：{}", e.getMessage());
+                log.error("下载异常：{}，IP地址：{}", e.getMessage(), IPUtils.getRemoteIp());
             } finally {
                 IOUtils.closeQuietly(fis);
                 IOUtils.closeQuietly(bis);
@@ -209,7 +209,7 @@ public class FileController {
     public ApiResponse back(@RequestParam String path) {
         File file = new File(path);
         if (file.exists() && file.getPath().startsWith(repository)) {
-            List<FileInfo> list = readList(file.getPath().equals(repository) ? file : file.getParentFile());
+            List<FileInfoVo> list = readList(file.getPath().equals(repository) ? file : file.getParentFile());
             Map<String, Object> data = new HashMap<>();
             data.put("path", file.getPath().equals(repository) ? file.getPath() : file.getParent());
             data.put("list", list);
@@ -218,11 +218,11 @@ public class FileController {
         return new ApiResponse(-1, "error", null);
     }
 
-    private List<FileInfo> readList(File file) {
+    private List<FileInfoVo> readList(File file) {
         File[] files = file.listFiles();
-        List<FileInfo> list = new ArrayList<>();
+        List<FileInfoVo> list = new ArrayList<>();
         for (File value : files) {
-            FileInfo info = FileInfo.builder()
+            FileInfoVo info = FileInfoVo.builder()
                     .name(value.getName())
                     .path(value.getPath())
                     .isDirectory(value.isDirectory())
@@ -232,7 +232,7 @@ public class FileController {
             list.add(info);
         }
         // 排序
-        list.sort(Comparator.comparing(FileInfo::getName));
+        list.sort(Comparator.comparing(FileInfoVo::getName));
         return list;
     }
 

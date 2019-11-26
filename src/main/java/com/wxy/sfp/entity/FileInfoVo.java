@@ -6,11 +6,11 @@ import lombok.Data;
 /**
  * @Author wxy
  * @Date 19-7-17 上午10:56
- * @Description TODO
+ * @Description TODO 文件视图类
  **/
 @Data
 @Builder
-public class FileInfo {
+public class FileInfoVo {
     private String name;
     private String path;
     private Boolean isDirectory;

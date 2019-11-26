@@ -10,14 +10,14 @@ import java.io.File;
 /**
  * @Author wxy
  * @Date 19-7-17 下午4:36
- * @Description TODO
+ * @Description TODO 程序启动执行：初始化仓库
  **/
 
 @Component
 @Slf4j
-public class InitConfiguration implements CommandLineRunner {
+public class StartupRunner implements CommandLineRunner {
 
-    @Value("${repository}")
+    @Value("${repository:repository}")
     private String repository;
 
     @Override
