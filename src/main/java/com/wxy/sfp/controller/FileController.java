@@ -29,20 +29,21 @@ import java.util.stream.Collectors;
 @RestController
 @Slf4j
 public class FileController {
-    @Value("${repository:repository}")
+
+    @Value("${file.repository}")
     private String repository;
 
     /**
      * 修改目录或文件
      *
-     * @param path
-     * @param oldName
-     * @param newName
+     * @param path    文件夹路径
+     * @param oldName 原名称
+     * @param newName 新名称
      * @return
      */
     @GetMapping("/rename")
     public ApiResponse rename(@RequestParam String path, @RequestParam String oldName, @RequestParam String newName) {
-        File folder = new File(path);
+        File folder = new File(getRealPath(path));
         File file = new File(folder.getPath() + File.separator + oldName);
         File file1 = new File(folder.getPath() + File.separator + newName);
         if (folder.exists() && file.exists() && !file1.exists()) {
@@ -58,15 +59,15 @@ public class FileController {
     /**
      * 删除目录或文件
      *
-     * @param path
+     * @param path 文件路径
      * @return
      */
     @GetMapping("/delete")
     public ApiResponse delete(@RequestParam String path) {
-        if (StringUtils.isNotBlank(path) && !path.equals(repository)) {
-            File file = new File(path);
+        if (StringUtils.isNotBlank(path)) {
+            File file = new File(getRealPath(path));
             if (file.exists() && deleteFile(file)) {
-                log.info("删除文件：{}，时间：{},IP：{}", path, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
+                log.info("删除文件：{}，时间：{},IP：{}", file.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                 return new ApiResponse(1, "success", "删除成功");
             }
         }
@@ -76,21 +77,20 @@ public class FileController {
     /**
      * 读取文件列表
      *
-     * @param path
+     * @param path 文件夹路径
      * @return
      */
     @GetMapping("/list")
     public ApiResponse list(@RequestParam(required = false) String path, @RequestParam(required = false) String name) {
-        String filepath = StringUtils.isBlank(path) ? repository : path;
-        File file = new File(filepath);
-        if (file.exists() && file.isDirectory() && file.getPath().startsWith(repository)) {
+        File file = new File(getRealPath(path));
+        if (file.exists() && file.isDirectory()) {
             List<FileInfoVo> list = readList(file);
             // 搜索(忽略大小写)
             if (StringUtils.isNotBlank(name)) {
                 list = list.stream().filter(f -> f.getName().toLowerCase().contains(name)).collect(Collectors.toList());
             }
             Map<String, Object> data = new HashMap<>();
-            data.put("path", file.getPath());
+            data.put("path", path);
             data.put("list", list);
             return new ApiResponse(1, "success", data);
         }
@@ -100,12 +100,12 @@ public class FileController {
     /**
      * 新建文件夹
      *
-     * @param path
+     * @param path 文件夹路径
      * @return
      */
     @GetMapping("/new")
     public ApiResponse newFolder(@RequestParam String path, @RequestParam String name) {
-        File parent = new File(path);
+        File parent = new File(getRealPath(path));
         if (parent.exists() && StringUtils.isNotBlank(name)) {
             File file = new File(parent.getPath() + File.separator + name);
             if (!file.exists()) {
@@ -120,15 +120,15 @@ public class FileController {
     /**
      * 上传文件
      *
-     * @param file
-     * @param path
+     * @param file 文件
+     * @param path 文件夹路径
      * @return
      */
     @PostMapping("/upload")
     public ApiResponse upload(@RequestParam("file") MultipartFile file, @RequestParam String path) {
         if (!file.isEmpty()) {
             String filename = file.getOriginalFilename();
-            File filepath = new File(StringUtils.isBlank(path) ? repository : path);
+            File filepath = new File(getRealPath(path));
             if (filepath.exists()) {
                 File dest = new File(filepath.getPath() + File.separator + filename);
                 InputStream is = null;
@@ -166,12 +166,12 @@ public class FileController {
      * 下载文件
      *
      * @param response
-     * @param path
+     * @param path     文件路径
      */
     @GetMapping("/download")
     public void download(HttpServletResponse response, @RequestParam String path) throws UnsupportedEncodingException {
-        File file = new File(path);
-        if (file.exists() && file.isFile() && file.getPath().startsWith(repository)) {
+        File file = new File(getRealPath(path));
+        if (file.exists() && file.isFile()) {
             response.setContentType("application/force-download");// 设置强制下载不打开
             response.addHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(file.getName(), "UTF-8"));// 设置文件名
 
@@ -202,22 +202,29 @@ public class FileController {
     /**
      * 返回上一层
      *
-     * @param path
+     * @param path 文件夹路径
      * @return
      */
     @GetMapping("/back")
     public ApiResponse back(@RequestParam String path) {
-        File file = new File(path);
-        if (file.exists() && file.getPath().startsWith(repository)) {
-            List<FileInfoVo> list = readList(file.getPath().equals(repository) ? file : file.getParentFile());
+        File file = new File(getRealPath(path));
+        if (file.exists()) {
+            File parentFile = StringUtils.isBlank(path) ? file : file.getParentFile();
+            List<FileInfoVo> list = readList(parentFile);
             Map<String, Object> data = new HashMap<>();
-            data.put("path", file.getPath().equals(repository) ? file.getPath() : file.getParent());
+            data.put("path", path.substring(path.lastIndexOf(File.separator)));
             data.put("list", list);
             return new ApiResponse(1, "success", data);
         }
         return new ApiResponse(-1, "error", null);
     }
 
+    /**
+     * 获取文件夹下的列表
+     *
+     * @param file 文件夹
+     * @return
+     */
     private List<FileInfoVo> readList(File file) {
         File[] files = file.listFiles();
         List<FileInfoVo> list = new ArrayList<>();
@@ -236,6 +243,12 @@ public class FileController {
         return list;
     }
 
+    /**
+     * 删除文件
+     *
+     * @param file 文件
+     * @return
+     */
     private boolean deleteFile(File file) {
         if (!file.exists()) {
             return false;
@@ -247,5 +260,17 @@ public class FileController {
             }
         }
         return file.delete();
+    }
+
+    /**
+     * 获取真实路径
+     *
+     * @param path 文件夹路径
+     * @return
+     */
+    private String getRealPath(String path) {
+        File repo = new File(repository);
+        path = StringUtils.isBlank(path) ? "" : path;
+        return repo.getPath() + File.separator + path;
     }
 }

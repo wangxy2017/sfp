@@ -17,7 +17,7 @@ import java.io.File;
 @Slf4j
 public class StartupRunner implements CommandLineRunner {
 
-    @Value("${repository:repository}")
+    @Value("${file.repository}")
     private String repository;
 
     @Override
@@ -25,7 +25,7 @@ public class StartupRunner implements CommandLineRunner {
         File file = new File(repository);
         if (!file.exists()) {
             boolean mkdir = file.mkdirs();
-            log.info("初始化文件夹：{}", mkdir);
+            log.info("创建文件仓库：{}", mkdir);
         }
     }
 }
