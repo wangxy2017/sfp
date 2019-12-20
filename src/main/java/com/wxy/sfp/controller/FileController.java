@@ -1,7 +1,7 @@
 package com.wxy.sfp.controller;
 
 import com.wxy.sfp.entity.ApiResponse;
-import com.wxy.sfp.entity.FileInfoVo;
+import com.wxy.sfp.entity.FileInfo;
 import com.wxy.sfp.util.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * @Author wxy
  * @Date 19-7-17 上午10:55
- * @Description TODO 文件操作控制器
+ * @Description TODO
  **/
 @RestController
 @Slf4j
@@ -147,7 +147,7 @@ public class FileController {
                     log.info("上传文件：{}，时间：{},IP：{}", dest.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
                     return new ApiResponse(1, "success", "上传成功");
                 } catch (IOException e) {
-                    log.error("上传失败:{}，IP地址：{}", e.getMessage(), IPUtils.getRemoteIp());
+                    log.error("上传失败:{}", e.getMessage());
                     return new ApiResponse(1, "error", "上传失败");
                 } finally {
                     IOUtils.closeQuietly(is);
@@ -189,7 +189,7 @@ public class FileController {
                 }
                 log.info("下载文件：{}，时间：{},IP：{}", file.getPath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), IPUtils.getRemoteIp());
             } catch (IOException e) {
-                log.error("下载异常：{}，IP地址：{}", e.getMessage(), IPUtils.getRemoteIp());
+                log.error("下载异常：{}", e.getMessage());
             } finally {
                 IOUtils.closeQuietly(fis);
                 IOUtils.closeQuietly(bis);
@@ -220,9 +220,9 @@ public class FileController {
 
     private List<FileInfo> readList(File file) {
         File[] files = file.listFiles();
-        List<FileInfoVo> list = new ArrayList<>();
+        List<FileInfo> list = new ArrayList<>();
         for (File value : files) {
-            FileInfoVo info = FileInfoVo.builder()
+            FileInfo info = FileInfo.builder()
                     .name(value.getName())
                     .path(value.getPath())
                     .isDirectory(value.isDirectory())
@@ -232,7 +232,7 @@ public class FileController {
             list.add(info);
         }
         // 排序
-        list.sort(Comparator.comparing(FileInfoVo::getName));
+        list.sort(Comparator.comparing(FileInfo::getName));
         return list;
     }
 
