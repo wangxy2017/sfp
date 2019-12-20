@@ -270,7 +270,9 @@ public class FileController {
      */
     private String getRealPath(String path) {
         File repo = new File(repository);
-        path = StringUtils.isBlank(path) ? "" : path;
-        return repo.getPath() + File.separator + path;
+        if (!repo.exists()) {
+            throw new RuntimeException("文件仓库不存在");
+        }
+        return repo.getPath() + File.separator + (StringUtils.isBlank(path) ? "" : path);
     }
 }

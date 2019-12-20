@@ -38,7 +38,7 @@
     </style>
 </head>
 <body>
-<table id="list">
+<table id="fileList">
     <tr>
         <td colspan="3" style="border-bottom: 1px solid #000;padding: 10px 0;">
             <input type="file" name="file" id="file" style="display: none" @change="doUpload(path)">
@@ -81,10 +81,10 @@
 <script src="js/vue.js"></script>
 <script src="js/axios.min.js"></script>
 <script>
-    var table = new Vue({
-        el: "#list",
+    var fileList = new Vue({
+        el: "#fileList",
         data: {
-            path: "",
+            path: "adfa",
             files: []
         },
         methods: {
@@ -93,30 +93,31 @@
                     .then(function (response) {
                         //console.log(response);
                         if (response.data.code == 1) {
-                            table.path = response.data.data.path;
-                            table.files = response.data.data.list;
+                            fileList.path = response.data.data.path;
+                            fileList.files = response.data.data.list;
                         }
                     });
             },
             goto: function (isDirectory, path) {
                 if (isDirectory) {
-                    table.loadList(path, "");
+                    fileList.loadList(path, "");
                 } else {
                     window.location.href = "/download?path=" + path;
                 }
             },
             back: function (path) {
+                alert(path);
                 axios.get('/back?path=' + path)
                     .then(function (response) {
                         //console.log(response);
                         if (response.data.code == 1) {
-                            table.path = response.data.data.path;
-                            table.files = response.data.data.list;
+                            fileList.path = response.data.data.path;
+                            fileList.files = response.data.data.list;
                         }
                     });
             },
             refresh: function (path) {
-                table.goto(true, path);
+                fileList.goto(true, path);
             },
             change: function (limit) {
                 var size = "";
@@ -162,7 +163,7 @@
                 var fileInput = document.getElementById("file");
                 var flag = true;
                 // 判断强制覆盖
-                table.files.forEach(function (f) {
+                fileList.files.forEach(function (f) {
                     if (f.name === fileInput.files[0].name && !window.confirm("文件已上传，是否强制覆盖?")) {
                         flag = false;
                         return false;
@@ -195,7 +196,7 @@
                         if (xhr.readyState === 4 && xhr.status === 200) {
                             var data = JSON.parse(xhr.response);
                             if (data.code == 1) {
-                                table.refresh(path);
+                                fileList.refresh(path);
                             } else {
                                 alert("上传失败");
                             }
@@ -214,7 +215,7 @@
                 axios.get('/new?path=' + path + '&name=' + name)
                     .then(function (response) {
                         if (response.data.code == 1) {
-                            table.refresh(path);
+                            fileList.refresh(path);
                         }
                     })
                     .catch(function (error) {
@@ -226,7 +227,7 @@
                     axios.get('/delete?path=' + path)
                         .then(function (response) {
                             if (response.data.code == 1) {
-                                table.refresh(table.path);
+                                fileList.refresh(fileList.path);
                             }
                         })
                         .catch(function (error) {
@@ -239,7 +240,7 @@
              */
             searchFile: function () {
                 var searchName = document.getElementById("searchName").value;
-                table.loadList(table.path, searchName);
+                fileList.loadList(fileList.path, searchName);
             },
             /**
              * 修改目录或文件
@@ -253,7 +254,7 @@
                     axios.get('/rename?path=' + path + '&oldName=' + name + '&newName=' + newName)
                         .then(function (response) {
                             if (response.data.code == 1) {
-                                table.refresh(path);
+                                fileList.refresh(path);
                             }
                         });
                 }
@@ -264,8 +265,8 @@
                 .then(function (response) {
                     //console.log(response);
                     if (response.data.code == 1) {
-                        table.path = response.data.data.path;
-                        table.files = response.data.data.list;
+                        fileList.path = response.data.data.path;
+                        fileList.files = response.data.data.list;
                     }
                 });
         }
