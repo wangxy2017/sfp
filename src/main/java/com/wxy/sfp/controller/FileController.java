@@ -136,7 +136,7 @@ public class FileController {
                 OutputStream os = null;
                 try {
                     is = file.getInputStream();
-                    bis = new BufferedInputStream(is);
+                    bis = new BufferedInputStream(is, 1024 * 1024 * 100);
                     os = new FileOutputStream(dest);
                     byte[] buffer = new byte[1024 * 1024 * 10];
                     int i = bis.read(buffer);
